@@ -1,0 +1,8 @@
+time_segment: [600, 400]
+segment_diff: 
+  - scale_start: 0.9999
+    scale_end: 0.001
+    width: 3
+  - scale_start: 0.001
+    scale_end: 0.0001
+    width: 2
