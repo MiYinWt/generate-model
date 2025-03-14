@@ -55,7 +55,6 @@ class NodeBlock(Module):
         return out
 
 
-class NodeEncoder(Module):
     
     def __init__(self, node_dim=256, edge_dim=64, key_dim=128, num_heads=4, 
                     num_blocks=6, k=48, cutoff=10.0, use_atten=True, use_gate=True,
@@ -246,8 +245,6 @@ class BondBlock(Module):
         return h_bond
 
 
-
-
 class EdgeBlock(Module):
     def __init__(self, edge_dim, node_dim, hidden_dim=None, use_gate=True):
         super().__init__()
@@ -395,7 +392,6 @@ class PosUpdate(Module):
 
         return delta_pos
 
-class NodeBondNet(Module):
     def __init__(self, node_dim, edge_dim, bond_dim, key_dim, num_heads, num_blocks, k, cutoff, use_atten, use_gate):
         super().__init__()
         self.node_dim = node_dim
@@ -542,40 +538,3 @@ class NodeBondNet(Module):
         index_key_bond_right = torch.cat(index_key_bond_right)
         return index_query_bond_left, index_key_bond_left, index_query_bond_right, index_key_bond_right
 
-class PosPredictor(Module):
-    def __init__(self, node_dim, edge_dim, bond_dim, use_gate):
-        super().__init__()
-        self.left_lin_edge = MLP(node_dim, edge_dim, hidden_dim=edge_dim)
-        self.right_lin_edge = MLP(node_dim, edge_dim, hidden_dim=edge_dim)
-        self.edge_lin = BondFFN(edge_dim, edge_dim, node_dim, use_gate, out_dim=1)
-
-        self.bond_dim = bond_dim
-        if bond_dim > 0:
-            self.left_lin_bond = MLP(node_dim, bond_dim, hidden_dim=bond_dim)
-            self.right_lin_bond = MLP(node_dim, bond_dim, hidden_dim=bond_dim)
-            self.bond_lin = BondFFN(bond_dim, bond_dim, node_dim, use_gate, out_dim=1)
-
-    def forward(self, h_node, pos_node, h_bond, bond_index, h_edge, edge_index, is_frag):
-        # 1 pos update through edges
-        is_left_frag = is_frag[edge_index[0]]
-        edge_index_left, edge_index_right = edge_index[:, is_left_frag]
-        
-        left_feat = self.left_lin_edge(h_node[edge_index_left])
-        right_feat = self.right_lin_edge(h_node[edge_index_right])
-        weight_edge = self.edge_lin(h_edge[is_left_frag], left_feat * right_feat)
-        force_edge = weight_edge * (pos_node[edge_index_left] - pos_node[edge_index_right])
-        delta_pos = scatter_sum(force_edge, edge_index_left, dim=0, dim_size=h_node.shape[0])
-
-        # 2 pos update through bonds
-        if self.bond_dim > 0:
-            is_left_frag = is_frag[bond_index[0]]
-            bond_index_left, bond_index_right = bond_index[:, is_left_frag]
-
-            left_feat = self.left_lin_bond(h_node[bond_index_left])
-            right_feat = self.right_lin_bond(h_node[bond_index_right])
-            weight_bond = self.bond_lin(h_bond[is_left_frag], left_feat * right_feat)
-            force_bond = weight_bond * (pos_node[bond_index_left] - pos_node[bond_index_right])
-            delta_pos = delta_pos + scatter_sum(force_bond, bond_index_left, dim=0, dim_size=h_node.shape[0])
-        
-        pos_update = pos_node + delta_pos / 10.
-        return pos_update #TODO: use only frag pos instead of all pos to save memory
