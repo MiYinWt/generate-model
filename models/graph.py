@@ -55,70 +55,6 @@ class NodeBlock(Module):
         return out
 
 
-class NodeEncoder(Module):
-    
-    def __init__(self, node_dim=256, edge_dim=64, key_dim=128, num_heads=4, 
-                    num_blocks=6, k=48, cutoff=10.0, use_atten=True, use_gate=True,
-                    dist_version='new'):
-        super().__init__()
-
-        self.node_dim = node_dim
-        self.edge_dim = edge_dim
-        self.key_dim = key_dim
-        self.num_heads = num_heads
-        self.num_blocks = num_blocks
-        self.k = k
-        self.cutoff = cutoff
-        self.use_atten = use_atten
-        self.use_gate = use_gate
-
-        if dist_version == 'new':
-            self.distance_expansion = GaussianSmearing(stop=cutoff, num_gaussians=20)
-            self.edge_emb = Linear(self.additional_edge_feat+20, edge_dim)
-        elif dist_version == 'old':
-            self.distance_expansion = GaussianSmearing(stop=cutoff, num_gaussians=edge_dim-self.additional_edge_feat)
-            self.edge_emb = Linear(edge_dim, edge_dim)
-        else:
-            raise NotImplementedError('dist_version notimplemented')
-        self.node_blocks = ModuleList()
-        for _ in range(num_blocks):
-            block = NodeBlock(
-                node_dim=node_dim,
-                edge_dim=edge_dim,
-                key_dim=key_dim,
-                num_heads=num_heads,
-                use_atten=use_atten,
-                use_gate=use_gate,
-            )
-            self.node_blocks.append(block)
-
-    @property
-    def out_channels(self):
-        return self.node_dim
-
-    def forward(self, h, pos, edge_index, is_mol):
-        #NOTE in the encoder, the edge dose not change since the position of mol and protein is fixed
-        # edge_index = radius_graph(pos, self.cutoff, batch=batch, loop=False)
-        edge_attr = self._add_edge_features(pos, edge_index, is_mol)
-        for interaction in self.node_blocks:
-            h = h + interaction(h, edge_index, edge_attr)
-        return h
-
-    @property
-    def additional_edge_feat(self,):
-        return 2
-
-    def _add_edge_features(self, pos, edge_index, is_mol):
-        edge_length = torch.norm(pos[edge_index[0]] - pos[edge_index[1]], dim=1)
-        edge_attr = self.distance_expansion(edge_length)
-        # 2-vector represent the two node types (atoms of protein or mol)
-        edge_src_feat = is_mol[edge_index[0]].float().view(-1, 1)
-        edge_dst_feat = is_mol[edge_index[1]].float().view(-1, 1)
-        edge_attr = torch.cat([edge_attr, edge_src_feat, edge_dst_feat], dim=1)
-        edge_attr = self.edge_emb(edge_attr)
-        return edge_attr
-
-
 class BondFFN(Module):
     def __init__(self, bond_dim, node_dim, inter_dim, use_gate, out_dim=None):
         super().__init__()
@@ -246,8 +182,6 @@ class BondBlock(Module):
         return h_bond
 
 
-
-
 class EdgeBlock(Module):
     def __init__(self, edge_dim, node_dim, hidden_dim=None, use_gate=True):
         super().__init__()
@@ -293,6 +227,7 @@ class EdgeBlock(Module):
 
         h_bond = self.out_transform(self.act(h_bond))
         return h_bond
+
 
 
 class NodeEdgeNet(Module):
