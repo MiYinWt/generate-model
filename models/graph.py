@@ -55,6 +55,7 @@ class NodeBlock(Module):
         return out
 
 
+class NodeEncoder(Module):
     
     def __init__(self, node_dim=256, edge_dim=64, key_dim=128, num_heads=4, 
                     num_blocks=6, k=48, cutoff=10.0, use_atten=True, use_gate=True,
@@ -243,6 +244,8 @@ class BondBlock(Module):
 
         h_bond = self.out_transform(self.act(h_bond))
         return h_bond
+
+
 
 
 class EdgeBlock(Module):
