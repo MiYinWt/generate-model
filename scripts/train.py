@@ -14,8 +14,8 @@ import wandb
 import utils.misc as misc
 import utils.train as utils_train
 import utils.transforms as trans
-from data import get_dataset
-from data.data import FOLLOW_BATCHs
+from datas import get_dataset
+from datas.data import FOLLOW_BATCH
 from models.model import Model
 from datetime import datetime
 
