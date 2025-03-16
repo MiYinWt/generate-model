@@ -15,8 +15,8 @@ import utils.misc as misc
 import utils.train as utils_train
 import utils.transforms as trans
 from data import get_dataset
-from data.data import FOLLOW_BATCH
-from model.model import Model
+from data.data import FOLLOW_BATCHs
+from models.model import Model
 from datetime import datetime
 
 def get_auroc(y_true, y_pred, feat_mode):
