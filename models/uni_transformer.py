@@ -1,5 +1,3 @@
-import  sys
-sys.path.append("../mygenmodel")
 import numpy as np
 import torch
 import torch.nn as nn
@@ -237,7 +235,6 @@ class UniTransformerO2TwoUpdateGeneral(nn.Module):
         self.num_h2x = num_h2x
         self.num_init_x2h = num_init_x2h
         self.num_init_h2x = num_init_h2x
-        self.r = r_max
         self.r_max = r_max
         self.x2h_out_fc = x2h_out_fc
         self.sync_twoup = sync_twoup
