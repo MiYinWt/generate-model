@@ -16,7 +16,7 @@ import utils.transforms as trans
 
 from models.model import Model,log_sample_categorical
 
-from data.data import ProteinLigandData, torchify_dict,FOLLOW_BATCH
+from datas.data import ProteinLigandData, torchify_dict,FOLLOW_BATCH
 from utils.data import PDBProtein
 from utils import reconstruct
 from rdkit import Chem

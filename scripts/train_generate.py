@@ -1,7 +1,6 @@
 import argparse
 import os, sys
 import shutil
-sys.path.append("../mygenmodel")
 import numpy as np
 import torch
 import torch.utils.tensorboard

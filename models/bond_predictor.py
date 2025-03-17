@@ -4,8 +4,8 @@ from torch.nn import functional as F
 
 from models.transition import ContigousTransition, GeneralCategoricalTransition
 from models.graph import NodeEdgeNet
-from .common import *
-from .diffusion import *
+from models.common import *
+from models.diffusion import *
 
 
 class BondPredictor(Module):
