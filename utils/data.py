@@ -4,7 +4,6 @@ from rdkit import Chem
 from rdkit.Chem.rdchem import BondType
 from rdkit.Chem import ChemicalFeatures
 from rdkit import RDConfig
-
 ATOM_FAMILIES = ['Acceptor', 'Donor', 'Aromatic', 'Hydrophobe', 'LumpedHydrophobe', 'NegIonizable', 'PosIonizable',
                  'ZnBinder']
 ATOM_FAMILIES_ID = {s: i for i, s in enumerate(ATOM_FAMILIES)}
@@ -18,7 +17,6 @@ BOND_TYPES = {
 BOND_NAMES = {v: str(k) for k, v in BOND_TYPES.items()}
 HYBRIDIZATION_TYPE = ['S', 'SP', 'SP2', 'SP3', 'SP3D', 'SP3D2']
 HYBRIDIZATION_TYPE_ID = {s: i for i, s in enumerate(HYBRIDIZATION_TYPE)}
-
 
 class PDBProtein(object):
     AA_NAME_SYM = {

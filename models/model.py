@@ -1,3 +1,5 @@
+import sys
+sys.path.append("../mygenmodel")
 import numpy as np
 import torch
 import torch.nn as nn

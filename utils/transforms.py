@@ -1,7 +1,7 @@
 import torch
 import torch.nn.functional as F
 import numpy as np
-
+from torch_geometric.transforms import Compose
 from datas.data import ProteinLigandData
 from utils import data as utils_data
 from scipy.special import softmax

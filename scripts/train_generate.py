@@ -1,5 +1,7 @@
+import sys
+sys.path.append("../mygenmodel")
 import argparse
-import os, sys
+import os
 import shutil
 import numpy as np
 import torch

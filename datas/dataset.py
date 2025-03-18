@@ -1,39 +1,39 @@
+import sys
+sys.path.append("../mygenmodel")
 import os
 import pickle
 import lmdb
-from torch.utils.data import Dataset
-from tqdm.auto import tqdm
 import argparse
-from utils.data import PDBProtein, parse_sdf_file
-from datas.data import ProteinLigandData, torchify_dict
-
 import torch
 import pandas as pd
 import lmdb
 from rdkit import Chem
 from tqdm import tqdm
 
+from utils.data import PDBProtein, parse_sdf_file
+from datas.data import ProteinLigandData, torchify_dict
 from torch.utils.data import Subset, Dataset
 from utils.parser import parse_conf_list
-
-
-import torch
-from torch.utils.data import Subset
-from dataset import PocketLigandPairDataset
 
 
 def get_dataset(config, *args, **kwargs):
     name = config.name
     root = config.path
     if name == 'pl':
+        print('Loading PocketLigandPair dataset...')
         dataset = PocketLigandPairDataset(root, *args, **kwargs)
     elif name == 'drug3d':
+        print('Loading Drug3D dataset...')
         dataset = Drug3DDataset(root, config.path_dict, *args, **kwargs)
     else:
         raise NotImplementedError('Unknown dataset: %s' % name)
 
     if 'split' in config:
-        split = torch.load(config.split)
+        split_by_molid = torch.load(os.path.join(root, config.split))
+        split = {
+            k: [dataset.molid2idx[mol_id] for mol_id in mol_id_list if mol_id in dataset.molid2idx]
+            for k, mol_id_list in split_by_molid.items()
+        }
         subsets = {k: Subset(dataset, indices=v) for k, v in split.items()}
         return dataset, subsets
     else:

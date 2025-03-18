@@ -1,7 +1,8 @@
 import os
 import shutil
 import argparse
-
+import sys
+sys.path.append("../mygenmodel")
 from tqdm import tqdm
 import torch
 torch.multiprocessing.set_sharing_strategy('file_system')
@@ -18,7 +19,7 @@ from utils.train import *
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--config', type=str, default='./configs/train/train_bondpred.yml')
+    parser.add_argument('--config', type=str, default='./configs/train/train_bond.yml')
     parser.add_argument('--device', type=str, default='cuda:0')
     parser.add_argument('--logdir', type=str, default='./logs')
     args = parser.parse_args()
@@ -57,6 +58,7 @@ if __name__ == '__main__':
         config = config.dataset,
         transform = transform,
     )
+    print(len(dataset))
     train_set, val_set = subsets['train'], subsets['val']
     train_iterator = inf_iterator(DataLoader(
         train_set, 
