@@ -13,7 +13,6 @@ from tqdm import tqdm
 from utils.data import PDBProtein, parse_sdf_file
 from datas.data import ProteinLigandData,torchify_dict
 from torch.utils.data import Subset, Dataset
-from utils.parser import parse_conf_list
 
 
 class PocketLigandPairDataset(Dataset):
