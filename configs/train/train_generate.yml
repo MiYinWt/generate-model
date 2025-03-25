@@ -1,75 +1,64 @@
-model:
-  name: diffusion
-  node_dim: 256
-  edge_dim: 64
-  denoiser:
-    backbone: NodeEdgeNet
-    num_blocks: 6
-    cutoff: 15
-    use_gate: True
-  diff:
-    num_timesteps: 1000
-    time_dim: 10
-    categorical_space: discrete
-    diff_pos:
-      beta_schedule: advance
-      scale_start: 0.9999
-      scale_end: 0.0001
-      width: 3
-    diff_atom: 
-      init_prob: tomask
-      beta_schedule: advance
-      scale_start: 0.9999
-      scale_end: 0.0001
-      width: 3
-    diff_bond:
-      init_prob: absorb
-      beta_schedule: segment
-      time_segment: [600, 400]
-      segment_diff: 
-        - scale_start: 0.9999
-          scale_end: 0.001
-          width: 3
-        - scale_start: 0.001
-          scale_end: 0.0001
-          width: 2
+dataset:
+  name: crossdocked
+  path: ./data/crossdocked_v1.1_rmsd1.0_pocket10
+  split: ./data/crossdocked_pocket10_pose_split.pt
+  transform:
+    ligand_atom_mode: add_aromatic
+    random_rot: False
 
+model:
+  model_mean_type: C0  # ['noise', 'C0']
+  beta_schedule: sigmoid
+  beta_start: 1.e-7
+  beta_end: 2.e-3
+  v_beta_schedule: cosine
+  v_beta_s: 0.01
+  num_diffusion_timesteps: 1000
+  loss_v_weight: 100.
+  sample_time_method: symmetric  # ['importance', 'symmetric']
+
+  time_emb_dim: 0
+  time_emb_mode: simple
+  center_pos_mode: protein
+
+  node_indicator: True
+  model_type: uni_o2
+  num_blocks: 1
+  num_layers: 9
+  hidden_dim: 128
+  n_heads: 16
+  edge_feat_dim: 4  # edge type feat
+  num_r_gaussian: 20
+  knn: 32 # !
+  num_node_types: 8
+  act_fn: relu
+  norm: True
+  cutoff_mode: knn  # [radius, none]
+  ew_net_type: global  # [r, m, none]
+  num_x2h: 1
+  num_h2x: 1
+  r_max: 10.
+  x2h_out_fc: False
+  sync_twoup: False
 
 train:
-  seed: 2023
-  batch_size: 256
-  num_workers: 64
-  pin_memory: True
-  max_iters: 110_000
-  val_freq: 1000
-  pos_noise_std: 0.05
-  max_grad_norm: 50.0
-  use_amp: True
+  seed: 2021
+  batch_size: 4
+  num_workers: 4
+  n_acc_batch: 1
+  max_iters: 10000000
+  val_freq: 100
+  pos_noise_std: 0.1
+  max_grad_norm: 8.0
+  bond_loss_weight: 1.0
   optimizer:
-    type: adamw
-    lr: 1.e-4
-    weight_decay: 1.e-8
-    beta1: 0.99
+    type: adam
+    lr: 5.e-4
+    weight_decay: 0
+    beta1: 0.95
     beta2: 0.999
   scheduler:
     type: plateau
-    factor: 0.8
-    patience: 1000
-    min_lr: 1.e-5
-
-transform:
-  use_mask_node: True
-  use_mask_edge: True
-
-dataset:
-  name: drug3d
-  root: ./data/geom_drug
-  path_dict:
-    sdf: sdf
-    summary: mol_summary.csv
-    processed: processed.lmdb
-  split: split_by_molid.pt
-
-chem:
-  atomic_numbers: [6,7,8,9,15,16,17]  # C N O F P S Cl
-  mol_bond_types: [1, 2, 3, 4]  # single, double, triple, aromatic
+    factor: 0.6
+    patience: 10
+    min_lr: 1.e-6

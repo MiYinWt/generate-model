@@ -52,7 +52,7 @@ transform:
   use_mask_edge: False
 
 dataset:
-  name: drug3d
+  name: geom
   path: ./datas/geom_drug
   path_dict:
     sdf: sdf
