@@ -28,7 +28,7 @@ class BondPredictor(Module):
         self.node_embedder = nn.Linear(num_node_types, node_dim-time_dim, bias=False)  # element type
         self.edge_embedder = nn.Linear(num_node_types * 2, edge_dim-time_dim, bias=False) # the init edge features
         if self.num_timesteps != 0:
-            self.time_emb = GaussianSmearing(stop=self.num_timesteps, num_gaussians=time_dim, type_='linear')
+            self.time_emb = GaussianSmearing(stop=self.num_timesteps, num_gaussians=time_dim)
         # # predictor
         self.encoder = NodeEdgeNet(node_dim, edge_dim, **config.encoder)
         self.edge_decoder = MLP(edge_dim + node_dim, num_edge_types, edge_dim, num_layer=3)

@@ -60,6 +60,13 @@ def get_optimizer(cfg, model):
             weight_decay=cfg.weight_decay,
             betas=(cfg.beta1, cfg.beta2,)
         )
+    elif cfg.type == 'adamw':
+        return torch.optim.AdamW(
+            model.parameters(),
+            lr=cfg.lr,
+            weight_decay=cfg.weight_decay,
+            betas=(cfg.beta1, cfg.beta2, )
+        )
     else:
         raise NotImplementedError('Optimizer not supported: %s' % cfg.type)
 

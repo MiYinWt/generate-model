@@ -220,7 +220,7 @@ class Drug3DDataset(Dataset):
                     if ligand_dict['num_confs'] == 0:
                         raise ValueError('No conformers found')
                     ligand_dict = torchify_dict(ligand_dict)
-                    data = ProteinLigandData.from_protein_ligand_dicts(ligand_dict)
+                    data = ProteinLigandData.from_protein_ligand_dicts(ligand_dict=ligand_dict)
 
                     data.smiles = smiles
                     data.mol_id = mol_id
@@ -231,7 +231,7 @@ class Drug3DDataset(Dataset):
                     )
                 except:
                     num_skipped += 1
-                    print('Skipping (%d) Num: %s, %s' % (num_skipped, mol_id, smiles))
+                    print('\nSkipping (%d) Num: %s, %s' % (num_skipped, mol_id, smiles))
                     continue
         db.close()
         print('Processed %d molecules' % (len(df_use) - num_skipped), 'Skipped %d molecules' % num_skipped)

@@ -193,31 +193,31 @@ class FeaturizeMol(object):
     
     def __call__(self, data: ProteinLigandData):
         
-        data.num_nodes = data.num_atoms
+        data.num_nodes = data.ligand_num_atoms
         
         # node type
-        assert np.all([ele in self.atomic_numbers for ele in data.element]), 'unknown element'
-        data.node_type = torch.LongTensor([self.ele_to_nodetype[ele.item()] for ele in data.element])
+        assert np.all([ele in self.atomic_numbers for ele in data.ligand_element]), 'unknown element'
+        data.node_type = torch.LongTensor([self.ele_to_nodetype[ele.item()] for ele in data.ligand_element])
         
         # atom pos: sample a conformer from data.pos_all_confs; then move to origin
-        idx = np.random.randint(data.pos_all_confs.shape[0])
-        atom_pos = data.pos_all_confs[idx].float()
+        idx = np.random.randint(data.ligand_pos_all_confs.shape[0])
+        atom_pos = data.ligand_pos_all_confs[idx].float()
         atom_pos = atom_pos - atom_pos.mean(dim=0)
 
         data.node_pos = atom_pos
-        data.i_conf = data.i_conf_list[idx]
+        data.i_conf = data.ligand_i_conf_list[idx]
         
         # build half edge (not full because perturb for edge_ij should be the same as edge_ji)
         edge_type_mat = torch.zeros([data.num_nodes, data.num_nodes], dtype=torch.long)
-        for i in range(data.num_bonds * 2):  # multiplication by two is for symmtric of bond index
-            edge_type_mat[data.bond_index[0, i], data.bond_index[1, i]] = data.bond_type[i]
+        for i in range(data.ligand_num_bonds * 2):  # multiplication by two is for symmtric of bond index
+            edge_type_mat[data.ligand_bond_index[0, i], data.ligand_bond_index[1, i]] = data.ligand_bond_type[i]
         halfedge_index = torch.triu_indices(data.num_nodes, data.num_nodes, offset=1)
         halfedge_type = edge_type_mat[halfedge_index[0], halfedge_index[1]]
         assert len(halfedge_type) == len(halfedge_index[0])
         
         data.halfedge_index = halfedge_index
         data.halfedge_type = halfedge_type
-        assert (data.halfedge_type > 0).sum() == data.num_bonds
+        assert (data.halfedge_type > 0).sum() == data.ligand_num_bonds
         
         return data
     

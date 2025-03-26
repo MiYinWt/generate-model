@@ -89,9 +89,10 @@ if __name__ == '__main__':
     # model, optimizer = amp.initialize(model, optimizer, opt_level='O1')
 
     def train(it):
+
         optimizer.zero_grad(set_to_none=True)
         batch = next(train_iterator).to(args.device)
-        
+     
         pos_noise = torch.randn_like(batch.node_pos) * config.train.pos_noise_std
         with torch.autocast(device_type='cuda', dtype=torch.float16, enabled=config.train.use_amp):
             loss_dict = model.get_loss(
